@@ -1,6 +1,6 @@
 {
   "name": "heydecks",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "CLI, local MCP connector, and agent skills for heydecks: turn any input into a brand-locked deck, PDF, and PPTX from Claude, Cursor, or your own agent.",
   "keywords": [
     "heydecks",
@@ -35,12 +35,14 @@
   "files": [
     "dist",
     "skills",
+    "scripts/postinstall.mjs",
     "server.json",
     "README.md"
   ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "dev": "tsc -p tsconfig.json --watch",
+    "postinstall": "node scripts/postinstall.mjs",
     "prepublishOnly": "npm run build"
   },
   "dependencies": {

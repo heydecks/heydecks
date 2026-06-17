@@ -9,11 +9,12 @@ This package connects Claude, Cursor, or your own agent to heydecks in one comma
 ## Quickstart (about a minute)
 
 ```sh
-npx heydecks install claude --token mcp_xxx
+npx heydecks install --token mcp_xxx
 ```
 
+- This connects **every** AI host you have installed (Claude Desktop, Cursor, Claude Code) in one shot, and offers to add the agent skills. Say yes.
+- Want just one? `npx heydecks install cursor`.
 - Get your token at **https://heydecks.com/dashboard/mcp**.
-- Swap `claude` for `cursor` or `claude-code`.
 
 Restart the app and try:
 
@@ -37,13 +38,13 @@ Then drop the `npx` from any command (`heydecks install cursor`).
 
 | Command | What it does |
 |---|---|
-| `heydecks install <host> [--token mcp_...]` | Set up a host: `claude`, `cursor`, or `claude-code`. |
+| `heydecks install [host]` | Connect a host, or **all** of them if you name none. Offers to add the skills. |
 | `heydecks login [--token mcp_...]` | Save your token once, so you don't repeat it. |
-| `heydecks skills add [--project]` | Install the heydecks agent skill (below). |
+| `heydecks skills add [--project]` | Install the heydecks agent skills (below). |
 | `heydecks mcp` | The local connector. Your host runs this; you usually won't. |
 | `heydecks help` | Show help. |
 
-Your token can come from `--token`, from `heydecks login`, or from the `HEYDECKS_TOKEN` environment variable.
+Hosts are `claude`, `cursor`, and `claude-code`. `install` takes `--token mcp_...`, and `--skills` / `--no-skills` to control the skills prompt. Your token can also come from `heydecks login` or the `HEYDECKS_TOKEN` environment variable.
 
 ## Connect your assistant
 
@@ -105,7 +106,9 @@ A deck costs 100 credits, the same on every channel. PDF and PPTX exports are al
 
 ## Authentication
 
-Use an `mcp_` token from [heydecks.com/dashboard/mcp](https://heydecks.com/dashboard/mcp). Browser-based OAuth is on the roadmap (`heydecks login --oauth`).
+Use an `mcp_` token from [heydecks.com/dashboard/mcp](https://heydecks.com/dashboard/mcp), via `--token`, `heydecks login`, or the `HEYDECKS_TOKEN` env var.
+
+Hosts that support remote MCP servers can instead connect straight to `https://heydecks.com/mcp` and **sign in with OAuth**, no token to paste.
 
 ## MCP registry
 
