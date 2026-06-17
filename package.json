@@ -1,0 +1,55 @@
+{
+  "name": "heydecks",
+  "version": "0.1.0",
+  "description": "CLI, local MCP connector, and agent skills for heydecks: turn any input into a brand-locked deck, PDF, and PPTX from Claude, Cursor, or your own agent.",
+  "type": "module",
+  "bin": {
+    "heydecks": "dist/cli.js"
+  },
+  "mcpName": "com.heydecks/heydecks",
+  "files": [
+    "dist",
+    "skills",
+    "server.json",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "heydecks",
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "cursor",
+    "deck",
+    "slides",
+    "powerpoint",
+    "pptx",
+    "presentation",
+    "ai",
+    "agent",
+    "cli"
+  ],
+  "license": "MIT",
+  "homepage": "https://heydecks.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/heydecks/heydecks.git"
+  },
+  "bugs": {
+    "url": "https://github.com/heydecks/heydecks/issues"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "typescript": "^5.5.0"
+  }
+}

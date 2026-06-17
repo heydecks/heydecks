@@ -1,0 +1,34 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "com.heydecks/heydecks",
+  "title": "heydecks",
+  "description": "Agent-native deck infrastructure. Turn any input into a brand-locked deck URL, a PDF, and a native PPTX. Your model writes the slides; heydecks renders, brands, and exports them.",
+  "version": "0.1.0",
+  "websiteUrl": "https://heydecks.com",
+  "repository": {
+    "url": "https://github.com/heydecks/heydecks",
+    "source": "github"
+  },
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://heydecks.com/mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Bearer token from heydecks.com/dashboard/mcp (format: mcp_...).",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ],
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "heydecks",
+      "version": "0.1.0",
+      "transport": { "type": "stdio" }
+    }
+  ]
+}
