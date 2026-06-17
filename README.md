@@ -1,50 +1,61 @@
 # heydecks
 
-The deck layer for AI agents. Turn any input into a brand-locked deck: a live link, a PDF, and a native PowerPoint, from Claude, Cursor, or your own agent.
+[![npm](https://img.shields.io/npm/v/heydecks.svg)](https://www.npmjs.com/package/heydecks) [![license](https://img.shields.io/npm/l/heydecks.svg)](./LICENSE)
 
-Your model writes the slides. heydecks renders, brands, and exports them.
+Make real, on-brand decks from your AI. Your model writes the slides; **heydecks turns them into a shareable link, a PDF, and an editable PowerPoint.**
 
-## What this package gives you
+This package connects Claude, Cursor, or your own agent to heydecks in one command.
 
-- **One-command setup** for Claude Desktop, Claude Code, and Cursor.
-- **A local MCP connector** (stdio to the hosted heydecks server at `https://heydecks.com/mcp`).
-- **The heydecks agent skill**, so your model knows the right workflow and slide types.
-
-## Quick start
+## Quickstart (about a minute)
 
 ```sh
-# 1. Grab a token at https://heydecks.com/dashboard/mcp
-npx heydecks login --token mcp_xxx
-
-# 2. Wire it into your AI host
-npx heydecks install claude        # or: claude-code, cursor
-
-# 3. (optional) teach your agent the workflow
-npx heydecks skills add
+npx heydecks install claude --token mcp_xxx
 ```
 
-Restart the app and ask: *"Make a 10-slide pitch deck from these notes and publish it on my brand."* You get back a live link, a PDF, and an editable PPTX.
+- Get your token at **https://heydecks.com/dashboard/mcp**.
+- Swap `claude` for `cursor` or `claude-code`.
 
-## Install
+Restart the app and try:
 
-- One-off: `npx heydecks <command>`
-- Global: `npm install -g heydecks`
+> "Make a 10-slide pitch deck from these notes and publish it on my brand."
+
+You get back a live link, a PDF, and a native PPTX.
+
+## Do I need to install anything?
+
+No. **`npx heydecks <command>`** always runs the latest version, nothing to install.
+
+Use it often and want a permanent `heydecks` command? Install it globally:
+
+```sh
+npm install -g heydecks
+```
+
+Then drop the `npx` from any command (`heydecks install cursor`).
 
 ## Commands
 
 | Command | What it does |
 |---|---|
-| `heydecks login [--token mcp_...]` | Save your token (or set `HEYDECKS_TOKEN`). |
-| `heydecks install [host]` | Configure a host: `claude`, `claude-code`, or `cursor`. |
-| `heydecks mcp` | Run the local MCP connector. Hosts launch this for you. |
-| `heydecks skills add [--project]` | Install the heydecks agent skill. |
+| `heydecks install <host> [--token mcp_...]` | Set up a host: `claude`, `cursor`, or `claude-code`. |
+| `heydecks login [--token mcp_...]` | Save your token once, so you don't repeat it. |
+| `heydecks skills add [--project]` | Install the heydecks agent skill (below). |
+| `heydecks mcp` | The local connector. Your host runs this; you usually won't. |
 | `heydecks help` | Show help. |
 
-## How it connects
+Your token can come from `--token`, from `heydecks login`, or from the `HEYDECKS_TOKEN` environment variable.
 
-heydecks runs a hosted MCP server at `https://heydecks.com/mcp` (Streamable HTTP, Bearer auth). `heydecks install` points your host at a small local connector (`heydecks mcp`) that forwards your calls upstream with your token, so it works even on hosts that only speak stdio.
+## Connect your assistant
 
-### Manual config (Claude Desktop / Cursor)
+### Claude Desktop or Cursor
+
+```sh
+npx heydecks install claude     # or: cursor
+```
+
+This writes the heydecks MCP server into the app's config. Restart the app to load it.
+
+Prefer to do it by hand? Add this to the config file:
 
 ```json
 {
@@ -62,39 +73,50 @@ heydecks runs a hosted MCP server at `https://heydecks.com/mcp` (Streamable HTTP
 
 ```sh
 claude mcp add heydecks -- npx -y heydecks mcp
+npx heydecks login --token mcp_xxx
 ```
 
-## Use it from your own agent
+## The agent skills
 
-Over MCP, the workflow is always:
+```sh
+npx heydecks skills add
+```
 
-1. `list_slide_templates` — discover every slide type and its fields.
-2. `create_deck` — get a deck id.
-3. `add_slides` (`replace: true`) — write the whole deck.
-4. `publish_deck` — get the live link, the PDF, and the PPTX.
+Installs the heydecks skills into `~/.claude/skills/` (use `--project` for `./.claude/skills/`):
 
-Building your own product instead of using a chat host? Call the REST API directly: `POST https://heydecks.com/v1/generate`. See [the docs](https://heydecks.com/docs).
+- **[heydecks](./skills/heydecks/SKILL.md)** — how to drive the tool: the build flow, choosing slide types, brand, and copy quality.
+- **[heydecks-deck-design](./skills/heydecks-deck-design/SKILL.md)** — how to structure a deck that lands: the slide sequence for pitch decks, sales decks, board updates, and more.
 
-A published deck costs 100 credits, the same on every channel. PDF and PPTX exports are free.
+Restart your agent to pick them up.
 
-## The agent skill
+## How it works
 
-`heydecks skills add` installs [`skills/heydecks/SKILL.md`](skills/heydecks/SKILL.md) into `~/.claude/skills/` (or `./.claude/skills/` with `--project`). It teaches the model the flow above, how to pick slide types, and how to stay on brand.
+heydecks runs a hosted MCP server at `https://heydecks.com/mcp`. The `heydecks mcp` connector is a tiny local bridge that forwards your host's requests there with your token, so it works even on hosts that only speak stdio. Over MCP the flow is always:
 
-## Auth
+```
+list_slide_templates  ->  create_deck  ->  add_slides  ->  publish_deck
+```
 
-Token-based today: get an `mcp_` token at [heydecks.com/dashboard/mcp](https://heydecks.com/dashboard/mcp). Browser-based OAuth is on the roadmap (`heydecks login --oauth`).
+`publish_deck` returns the live link, the PDF, and the PPTX. Your model writes every word; heydecks does the rendering, branding, and exports.
+
+Building your own product instead of using a chat assistant? Skip MCP and call the REST API directly: `POST https://heydecks.com/v1/generate`. See the [docs](https://heydecks.com/docs).
+
+A deck costs 100 credits, the same on every channel. PDF and PPTX exports are always free.
+
+## Authentication
+
+Use an `mcp_` token from [heydecks.com/dashboard/mcp](https://heydecks.com/dashboard/mcp). Browser-based OAuth is on the roadmap (`heydecks login --oauth`).
 
 ## MCP registry
 
-This server is published to the official MCP registry as `com.heydecks/heydecks`. See [`server.json`](server.json).
+Published to the official MCP registry as `com.heydecks/heydecks`. See [`server.json`](./server.json).
 
 ## Links
 
-- Product: [heydecks.com](https://heydecks.com)
-- Docs: [heydecks.com/docs](https://heydecks.com/docs)
-- MCP setup: [heydecks.com/docs/mcp](https://heydecks.com/docs/mcp)
+- Product: https://heydecks.com
+- Docs: https://heydecks.com/docs
+- MCP setup: https://heydecks.com/docs/mcp
 
 ## License
 
-MIT, (c) unscripted GmbH.
+MIT, &copy; unscripted GmbH.
