@@ -9,12 +9,12 @@ This package connects Claude, Cursor, or your own agent to heydecks in one comma
 ## Quickstart (about a minute)
 
 ```sh
-npx heydecks install --token mcp_xxx
+npx heydecks install
 ```
 
-- This connects **every** AI host you have installed (Claude Desktop, Cursor, Claude Code) in one shot, and offers to add the agent skills. Say yes.
+- This connects **every** AI host you have installed (Claude Desktop, Cursor, Claude Code) to heydecks. Restart the app and it opens a browser to **sign in with OAuth** — no token to paste. It also offers to add the agent skills.
 - Want just one? `npx heydecks install cursor`.
-- Get your token at **https://heydecks.com/dashboard/mcp**.
+- Prefer a token? `npx heydecks install --token mcp_xxx` (get one at https://heydecks.com/dashboard/mcp).
 
 Restart the app and try:
 
@@ -46,35 +46,35 @@ Then drop the `npx` from any command (`heydecks install cursor`).
 
 Hosts are `claude`, `cursor`, and `claude-code`. `install` takes `--token mcp_...`, and `--skills` / `--no-skills` to control the skills prompt. Your token can also come from `heydecks login` or the `HEYDECKS_TOKEN` environment variable.
 
-## Connect your assistant
+## How connecting works
 
-### Claude Desktop or Cursor
+`heydecks install` points each host at the hosted server `https://heydecks.com/mcp` and lets it **sign in with OAuth**:
 
-```sh
-npx heydecks install claude     # or: cursor
-```
+- **Cursor** and **Claude Code** connect to the URL directly and run the browser sign-in.
+- **Claude Desktop** uses `mcp-remote` (a tiny stdio bridge) to do the same.
 
-This writes the heydecks MCP server into the app's config. Restart the app to load it.
+Restart the app after installing; the first time it connects, a browser opens to authorize heydecks.
 
-Prefer to do it by hand? Add this to the config file:
+### By hand
+
+Cursor (`~/.cursor/mcp.json`):
 
 ```json
-{
-  "mcpServers": {
-    "heydecks": {
-      "command": "npx",
-      "args": ["-y", "heydecks", "mcp"],
-      "env": { "HEYDECKS_TOKEN": "mcp_xxx" }
-    }
-  }
-}
+{ "mcpServers": { "heydecks": { "url": "https://heydecks.com/mcp" } } }
 ```
 
-### Claude Code
+Claude Code:
 
 ```sh
-claude mcp add heydecks -- npx -y heydecks mcp
-npx heydecks login --token mcp_xxx
+claude mcp add --transport http heydecks https://heydecks.com/mcp
+```
+
+### Using a token instead of OAuth
+
+Pass `--token mcp_xxx` to `install`, or configure it directly:
+
+```json
+{ "mcpServers": { "heydecks": { "url": "https://heydecks.com/mcp", "headers": { "Authorization": "Bearer mcp_xxx" } } } }
 ```
 
 ## The agent skills
@@ -106,9 +106,9 @@ A deck costs 100 credits, the same on every channel. PDF and PPTX exports are al
 
 ## Authentication
 
-Use an `mcp_` token from [heydecks.com/dashboard/mcp](https://heydecks.com/dashboard/mcp), via `--token`, `heydecks login`, or the `HEYDECKS_TOKEN` env var.
+**OAuth (default).** `heydecks install` sets your host up to sign in to heydecks in the browser. Nothing to paste; the host (or `mcp-remote`) manages the token and its refresh.
 
-Hosts that support remote MCP servers can instead connect straight to `https://heydecks.com/mcp` and **sign in with OAuth**, no token to paste.
+**Token (fallback).** Prefer a static token? Get an `mcp_` token at [heydecks.com/dashboard/mcp](https://heydecks.com/dashboard/mcp) and pass `--token`, save it with `heydecks login`, or set `HEYDECKS_TOKEN`.
 
 ## MCP registry
 

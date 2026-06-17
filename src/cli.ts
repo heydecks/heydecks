@@ -9,19 +9,20 @@ const HELP = `heydecks - the deck layer for AI agents
 Usage: heydecks <command> [options]
 
 Commands:
-  install [host]                Connect a host. No host (or "all") = every one.
+  install [host]                Connect a host with OAuth (sign in), or --token.
+                                No host (or "all") = every installed host.
                                 hosts: claude | cursor | claude-code
                                 flags: --token <mcp_...>  --skills  --no-skills
-  login [--token <mcp_...>]     Save your heydecks token (or set HEYDECKS_TOKEN)
+  login [--token <mcp_...>]     Save an mcp_ token (only needed for the token path)
   skills add [--project]        Install the heydecks agent skills
-  mcp                           Run the local MCP connector (hosts launch this)
+  mcp                           Local connector for the token path (hosts launch it)
   help                          Show this help
 
 Examples:
-  npx heydecks install --token mcp_xxx       # connect every installed host
+  npx heydecks install                       # every host, sign in with OAuth
   npx heydecks install cursor                # just one host
+  npx heydecks install --token mcp_xxx       # use an mcp_ token instead
   npx heydecks skills add
-  npm install -g heydecks && heydecks install
 
 Token: https://heydecks.com/dashboard/mcp
 Docs:  https://heydecks.com/docs/mcp`;

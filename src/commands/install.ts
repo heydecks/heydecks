@@ -4,7 +4,7 @@ import { homedir, platform } from "node:os";
 import { dirname, join } from "node:path";
 import { stdin, stdout } from "node:process";
 import { createInterface } from "node:readline/promises";
-import { DASHBOARD_TOKEN_URL, getToken } from "../config.js";
+import { DASHBOARD_TOKEN_URL, getToken, MCP_URL } from "../config.js";
 import { addSkills } from "./skills.js";
 
 type Host = "claude" | "claude-code" | "cursor";
@@ -24,20 +24,6 @@ function flagValue(args: string[], flag: string): string | undefined {
   return i >= 0 ? args[i + 1] : undefined;
 }
 
-function configPath(host: Host): string | null {
-  const home = homedir();
-  const os = platform();
-  if (host === "claude") {
-    if (os === "darwin")
-      return join(home, "Library", "Application Support", "Claude", "claude_desktop_config.json");
-    if (os === "win32")
-      return join(process.env.APPDATA ?? join(home, "AppData", "Roaming"), "Claude", "claude_desktop_config.json");
-    return join(home, ".config", "Claude", "claude_desktop_config.json");
-  }
-  if (host === "cursor") return join(home, ".cursor", "mcp.json");
-  return null; // claude-code uses its own CLI
-}
-
 function readJson(path: string): HostConfigFile {
   try {
     return JSON.parse(readFileSync(path, "utf8")) as HostConfigFile;
@@ -46,45 +32,70 @@ function readJson(path: string): HostConfigFile {
   }
 }
 
-function serverEntry(token: string | undefined) {
-  return {
-    command: "npx",
-    args: ["-y", "heydecks", "mcp"],
-    ...(token ? { env: { HEYDECKS_TOKEN: token } } : {}),
-  };
+function writeServer(path: string, entry: unknown): void {
+  const config = readJson(path);
+  config.mcpServers = config.mcpServers ?? {};
+  config.mcpServers.heydecks = entry;
+  mkdirSync(dirname(path), { recursive: true });
+  writeFileSync(path, JSON.stringify(config, null, 2) + "\n");
+}
+
+function cursorPath(): string {
+  return join(homedir(), ".cursor", "mcp.json");
+}
+
+function claudeDesktopPath(): string {
+  const home = homedir();
+  const os = platform();
+  if (os === "darwin")
+    return join(home, "Library", "Application Support", "Claude", "claude_desktop_config.json");
+  if (os === "win32")
+    return join(process.env.APPDATA ?? join(home, "AppData", "Roaming"), "Claude", "claude_desktop_config.json");
+  return join(home, ".config", "Claude", "claude_desktop_config.json");
 }
 
 /**
- * Configure one host. `forced` is true when the user named a single host, so
- * we set it up even if it is not detected; otherwise (install-all) we skip
- * hosts that are not present rather than leaving stray config files.
+ * Configure one host. OAuth is the default: the host (or mcp-remote) signs in
+ * to heydecks in the browser, no token to paste. `token` switches to the
+ * mcp_ Bearer path. `forced` (a single named host) sets it up even if the app
+ * is not detected; install-all skips undetected hosts.
  */
 function installOne(host: Host, token: string | undefined, forced: boolean): string {
+  // Claude Code: native remote HTTP + OAuth via its CLI.
   if (host === "claude-code") {
-    const a = ["mcp", "add", "heydecks"];
-    if (token) a.push("-e", `HEYDECKS_TOKEN=${token}`);
-    a.push("--", "npx", "-y", "heydecks", "mcp");
+    const a = ["mcp", "add", "--transport", "http", "heydecks", MCP_URL];
+    if (token) a.push("--header", `Authorization: Bearer ${token}`);
     const res = spawnSync("claude", a, { stdio: "ignore" });
     if (res.error || res.status !== 0) {
       return forced
-        ? "claude-code  run: claude mcp add heydecks -- npx -y heydecks mcp"
+        ? `claude-code  run: claude mcp add --transport http heydecks ${MCP_URL}`
         : "claude-code  not detected, skipped";
     }
-    return "claude-code  added via the claude CLI";
+    return token ? "claude-code  added (token)" : "claude-code  added (sign in with OAuth)";
   }
 
-  const path = configPath(host);
-  if (!path) return `${host}  unsupported`;
-  if (!forced && !existsSync(dirname(path))) {
-    return `${host.padEnd(11)}  not detected, skipped`;
+  // Cursor: native remote URL. Cursor runs the OAuth browser flow itself.
+  if (host === "cursor") {
+    const path = cursorPath();
+    if (!forced && !existsSync(dirname(path))) return "cursor       not detected, skipped";
+    writeServer(
+      path,
+      token ? { url: MCP_URL, headers: { Authorization: `Bearer ${token}` } } : { url: MCP_URL },
+    );
+    return `cursor       ${path}${token ? " (token)" : " (OAuth)"}`;
   }
 
-  const config = readJson(path);
-  config.mcpServers = config.mcpServers ?? {};
-  config.mcpServers.heydecks = serverEntry(token);
-  mkdirSync(dirname(path), { recursive: true });
-  writeFileSync(path, JSON.stringify(config, null, 2) + "\n");
-  return `${host.padEnd(11)}  ${path}`;
+  // Claude Desktop: stdio config. OAuth goes through mcp-remote (it handles the
+  // browser sign-in and bridges to the remote server); token uses our connector.
+  const path = claudeDesktopPath();
+  if (!forced && !existsSync(dirname(path))) return "claude       not detected, skipped";
+  writeServer(
+    path,
+    token
+      ? { command: "npx", args: ["-y", "heydecks", "mcp"], env: { HEYDECKS_TOKEN: token } }
+      : { command: "npx", args: ["-y", "mcp-remote", MCP_URL] },
+  );
+  return `claude       ${path}${token ? " (token)" : " (OAuth via mcp-remote)"}`;
 }
 
 async function maybeAddSkills(args: string[]): Promise<void> {
@@ -106,8 +117,9 @@ async function maybeAddSkills(args: string[]): Promise<void> {
 }
 
 /**
- * `heydecks install` with no host (or `all`) configures every host it can find.
- * `heydecks install <host>` targets one. Either way it offers to add the skills.
+ * `heydecks install` with no host (or `all`) configures every host it can find;
+ * `heydecks install <host>` targets one. OAuth by default, `--token` for the
+ * mcp_ token path. Then it offers to add the agent skills.
  */
 export async function installHost(hostArg: string | undefined, args: string[]): Promise<void> {
   const token = flagValue(args, "--token") ?? getToken();
@@ -128,7 +140,8 @@ export async function installHost(hostArg: string | undefined, args: string[]): 
   out(
     token
       ? "\nDone. Restart the app(s) to load the heydecks tools.\n"
-      : `\nDone. No token yet: run "heydecks login" or get one at ${DASHBOARD_TOKEN_URL}\n`,
+      : "\nDone. Restart the app(s); they will open a browser to sign in to heydecks.\n" +
+          `Prefer a token instead? Re-run with --token (get one at ${DASHBOARD_TOKEN_URL}).\n`,
   );
 
   await maybeAddSkills(args);
