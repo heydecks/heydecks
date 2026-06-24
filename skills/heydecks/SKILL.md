@@ -57,7 +57,7 @@ A deck's appearance is two layers: the **brand** (colours, fonts, logo) and the 
 **Brand (be interactive, don't guess):**
 - Call `list_brands`. It returns each brand plus its current Art Direction (`style.preset`, `style.background`).
 - If there are several brands, or it isn't obvious which fits, **ask the user which brand to use, or whether to make a new one.** Don't silently pick.
-- New brand from a website: `extract_brand_from_url` once, then `create_brand` to save it. (Extraction costs 50 credits.)
+- New brand from a website: `extract_brand_from_url` returns a complete brand kit from the live site, colours, fonts, tone, AND an inferred Art Direction (`style.preset` and `style.background`). Save it with `create_brand`, then `update_brand` passing the returned `colors`, `typography`, and the inferred `style.preset` as `art_direction` (and `style.background` as `background`). (Extraction costs 50 credits.)
 - Pass the chosen `brand_id` to `create_deck` (or `set_active_brand` to make it the default).
 
 **Art Direction (give the deck a look):**
