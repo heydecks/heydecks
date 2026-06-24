@@ -1,8 +1,13 @@
 #!/usr/bin/env node
+import { createRequire } from "node:module";
 import { installHost } from "./commands/install.js";
 import { login } from "./commands/login.js";
 import { runMcp } from "./commands/mcp.js";
 import { addSkills } from "./commands/skills.js";
+
+const pkg = createRequire(import.meta.url)("../package.json") as {
+  version: string;
+};
 
 const HELP = `heydecks - the deck layer for AI agents
 
@@ -17,6 +22,7 @@ Commands:
   skills add [--project]        Install the heydecks agent skills
   mcp                           Local connector for the token path (hosts launch it)
   help                          Show this help
+  version                       Show the installed CLI version
 
 Examples:
   npx heydecks install                       # every host, sign in with OAuth
@@ -31,6 +37,11 @@ async function main(): Promise<void> {
   const [command, ...rest] = process.argv.slice(2);
 
   switch (command) {
+    case "version":
+    case "--version":
+    case "-v":
+      process.stdout.write(`heydecks ${pkg.version}\n`);
+      break;
     case "mcp":
       await runMcp();
       break;

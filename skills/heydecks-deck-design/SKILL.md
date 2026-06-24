@@ -13,7 +13,7 @@ Most weak decks fail on structure, not tools. This skill is the narrative: what 
 - **Lead with the takeaway,** not the setup. The slide title is the conclusion ("Revenue up 42%"), not the topic ("Revenue").
 - **Show numbers as numbers.** A metric belongs on a `bigNumber`, `kpi`, `metricDashboard`, or a chart/table slide, never buried in a bullet.
 - **8 to 15 slides** for most decks. Shorter is almost always better. Cut anything that is not advancing the argument.
-- **Open and close on purpose.** A `title` slide up front, a `closing` slide with the one ask or next step at the end.
+- **Open and close on purpose.** A `title` slide up front, a `cta` slide with the one ask or next step at the end.
 - **Keep the through-line.** Each slide should make the next one feel inevitable.
 
 ## Deck recipes
@@ -31,7 +31,7 @@ Each line is one slide. Adapt to the user's content; drop slides they have no ma
 8. Business model: how you make money (`pricing` or `revenueBreakdown`)
 9. Competition: where you win (`comparisonMatrix` or `compare`)
 10. Team: why you
-11. The ask: round size and use of funds (`closing`)
+11. The ask: round size and use of funds (`cta`)
 
 ### Sales deck (B2B, to a prospect)
 1. Title
@@ -41,7 +41,7 @@ Each line is one slide. Adapt to the user's content; drop slides they have no ma
 5. How it works
 6. Proof: results, logos, a case study number (`bigNumber`)
 7. Pricing / packages (`pricing`)
-8. Next step: one clear action (`closing`)
+8. Next step: one clear action (`cta`)
 
 ### Board or investor update
 1. Title: period + headline ("Q3: revenue +42%, runway 14 months")
@@ -50,7 +50,7 @@ Each line is one slide. Adapt to the user's content; drop slides they have no ma
 4. Lowlights: what did not, and the fix
 5. Financials: revenue, burn, runway (`financials` or `waterfall`)
 6. Key initiatives / roadmap (`roadmap`)
-7. Asks: where you need help (`closing`)
+7. Asks: where you need help (`cta`)
 
 ### Product launch / GTM
 1. Title
@@ -60,7 +60,7 @@ Each line is one slide. Adapt to the user's content; drop slides they have no ma
 5. How it works
 6. Launch plan and timeline (`timeline` or `milestonePlan`)
 7. Goals and metrics (`kpi`)
-8. Call to action (`closing`)
+8. Call to action (`cta`)
 
 ### Quarterly business review (QBR)
 1. Title: account + period
@@ -68,7 +68,7 @@ Each line is one slide. Adapt to the user's content; drop slides they have no ma
 3. Wins and what drove them
 4. Risks / blockers and mitigations
 5. Roadmap for next quarter (`roadmap`)
-6. Expansion or renewal ask (`closing`)
+6. Expansion or renewal ask (`cta`)
 
 ### Proposal
 1. Title
@@ -77,7 +77,20 @@ Each line is one slide. Adapt to the user's content; drop slides they have no ma
 4. Timeline (`timeline` or `gantt`)
 5. Investment (`pricing`)
 6. Why us (`compare`)
-7. Next step (`closing`)
+7. Next step (`cta`)
+
+## Pick a look (Art Direction)
+
+Structure is the deck; the Art Direction is how it feels. After you know the deck type, choose a direction and pass it as `art_direction` (per-deck) on `create_deck`, or set it on the brand. It restyles type, shape, and the canvas background over the brand's own colours, so one brand can wear many looks.
+
+- **Pitch / product / AI:** `spotlight` (cinematic), `luminous` (modern mesh), or `aurora` (premium, dreamy).
+- **Finance / board / enterprise / data:** `swiss` or `corporate` (clean order), `blueprint` (precise, technical grid).
+- **Sales / proposal:** `corporate` or `horizon` (calm, modern, trustworthy).
+- **Narrative / thought leadership / case study:** `editorial` (serif, magazine).
+- **Consumer / internal / friendly:** `soft` or `horizon` (rounded, warm).
+- **Launch / marketing / brand:** `bold` (loud) or `studio` (expressive).
+
+When you don't know the audience's taste, ask: "Want it clean and corporate, modern and premium, or bold and expressive?" Keep the background subtle; the content is the star.
 
 ## Picking length and depth
 
