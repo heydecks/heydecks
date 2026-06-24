@@ -18,9 +18,9 @@ The user wants a finished, shareable deck, not just slide text: "make a deck / p
 Always in this order:
 
 1. **Settle the brand and look first** (see "Brand and look" below). Call `list_brands`. If which brand to use isn't obvious, ask the user. Decide an `art_direction` too, or ask for the vibe.
-2. **`list_slide_templates`**, every time. It returns every slide type with its fields (each field's `key`, `label`, `type`, max length, allowed values) AND a `whenToUse` line that tells you exactly when to reach for it. Read it; never guess field names, types, or limits. (`list_slide_types` adds this workspace's custom blocks, referenced as `custom:<id>`.)
+2. **`list_slide_templates`** in two cheap steps. Call it with **no arguments** for a compact pick-list (`key`, `name`, `category`, and a one-line `whenToUse`) of every slide type. Use the `whenToUse` lines to choose the slides that fit. Then call **`list_slide_templates({ keys: [...] })`** to pull the exact field schema for *only* the slides you picked. Don't pull all 89 schemas at once; never guess field names, types, or limits. (`list_slide_types` adds this workspace's custom blocks, referenced as `custom:<id>`.)
 3. **`create_deck`** with a clear title, plus `brand_id` and `art_direction` from step 1. It returns a deck id.
-4. **`add_slides`** with `replace: true` to set the whole deck in one call. Each slide is `{ type, content }`, where `content` is an object whose keys are the field keys from step 2.
+4. **`add_slides`** with `replace: true` to set the whole deck in one call. Each slide is `{ type, content }`, where `content` is an object whose keys are the field keys you fetched in step 2.
 5. **`publish_deck`**. It returns the live URL, the PDF, and the PPTX. Hand all three to the user.
 
 For edits afterward use `update_slide`, `append_slide`, `reorder_slides`, or `delete_slide` instead of rebuilding the whole deck.
