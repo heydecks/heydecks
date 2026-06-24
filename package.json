@@ -1,6 +1,6 @@
 {
   "name": "heydecks",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "CLI, local MCP connector, and agent skills for heydecks: turn any input into a brand-locked deck, PDF, and PPTX from Claude, Cursor, or your own agent.",
   "keywords": [
     "heydecks",
